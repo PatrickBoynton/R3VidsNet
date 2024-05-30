@@ -1,0 +1,6 @@
+@R3vids_HostAddress = http://localhost:5070
+
+GET {{R3vids_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

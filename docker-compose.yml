@@ -1,0 +1,44 @@
+services:
+    postgres:
+        image: postgres:latest
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: safepass1
+            POSTGRES_DB: r3vids
+        volumes:
+            - r3vids:/var/lib/postgresql/data
+    dotnet:
+        image: mcr.microsoft.com/dotnet/sdk:8.0
+        volumes:
+            - .:/app
+            - ./wwwroot:/app/wwwroot
+        working_dir: /app
+        command: >
+            bash -c "dotnet restore &&
+            apt-get update &&
+            apt-get install -y ffmpeg &&
+            dotnet tool install --global dotnet-ef &&
+            export PATH=\"$PATH:/root/.dotnet/tools\" &&
+            dotnet ef database update &&
+            dotnet watch run"
+        ports:
+            - "5070:5070"
+        depends_on:
+            - postgres
+    next:
+        image: node:latest
+        volumes:
+            - /home/mymar101/r3vids-next:/app
+        working_dir: /app
+        command: >
+            bash -c "npm install &&
+            npm run dev"
+        ports:
+            - "3000:3000"
+        depends_on:
+            - dotnet
+volumes:
+    r3vids:
+    dotnet:
