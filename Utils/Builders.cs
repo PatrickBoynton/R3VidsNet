@@ -14,7 +14,7 @@ public static class Builders
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<VideoDbContext>();
             var video = context.Videos.FirstOrDefault();
-            var videos = BuildVideo();
+            var videos = await BuildVideo(context, app);
 
             Console.WriteLine("---> Initializing database.");
             if (!context.Videos.Any() && !context.VideoStatus.Any())
@@ -75,12 +75,14 @@ public static class Builders
         return Convert.ToDecimal(duration);
     }
 
-    private static List<Video> BuildVideo()
+    private static async Task<List<Video>> BuildVideo(VideoDbContext context, WebApplication app)
     {
         try
         {
             var files = FileHelpers.GetFiles();
             var baseUrl = BuildUrl();
+            // await CheckFilesAndUpdateDatabase(context, app, files);  
+
             var videos = files.Where(File.Exists)
                 .Where(file => file.EndsWith(".mp4"))
                 .Select(file =>
@@ -112,6 +114,38 @@ public static class Builders
                     return video;
                 }).ToList();
 
+            var newVideos = files
+                // Checks if the file exists
+                .Select(file => new { FileName = file, Url = baseUrl + Path.GetFileName(file) })
+                // Checks if the video is already in the database
+                .Where(fileInfo => !context.Videos.Any(v => v.Url == fileInfo.Url))
+                // Maps the file to a video object
+                .Select(fileInfo => new Video
+                {
+                    Title = Path.GetFileNameWithoutExtension(fileInfo.FileName),
+                    Url = fileInfo.Url,
+                    Image = "https://via.placeholder.com/150",
+                    Duration = BuildDuration(fileInfo.FileName),
+                    UploadedDate = DateTime.UtcNow,
+                    VideoStatus = new VideoStatus
+                    {
+                        LastPlayed = null,
+                        CurrentPlayTime = 0,
+                        PlayCount = 0,
+                        Played = false,
+                        IsWatchLater = false,
+                        Video = null!,
+                        VideoId = Guid.NewGuid()
+                    }
+                }).ToList();
+
+
+            if (newVideos.Any())
+            {
+                context.Videos.AddRange(newVideos);
+                await context.SaveChangesAsync();
+            }
+
             return videos;
         }
         catch (Exception e)
@@ -135,5 +169,44 @@ public static class Builders
             video.Url = BuildUrl() + Path.GetFileName(video.Url);
 
         return videos;
+    }
+
+
+    public static async Task CheckFilesAndUpdateDatabase(VideoDbContext context, WebApplication app, List<string> files)
+    {
+        using var scope = app.Services.CreateScope();
+
+        foreach (var file in files)
+        {
+            var url = BuildUrl();
+            var video = context.Videos.FirstOrDefault(v => v.Url == url);
+
+            if (video == null)
+            {
+                var videoStatus = new VideoStatus
+                {
+                    LastPlayed = null,
+                    CurrentPlayTime = 0,
+                    PlayCount = 0,
+                    Played = false,
+                    IsWatchLater = false,
+                    Video = null!,
+                    VideoId = Guid.NewGuid()
+                };
+
+                var newVideo = new Video
+                {
+                    Title = Path.GetFileNameWithoutExtension(file),
+                    Url = url,
+                    Image = "https://via.placeholder.com/150",
+                    Duration = BuildDuration(file),
+                    UploadedDate = DateTime.UtcNow,
+                    VideoStatus = videoStatus
+                };
+                context.Videos.Add(newVideo);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 }
