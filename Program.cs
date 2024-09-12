@@ -48,8 +48,10 @@ app.MapControllers();
 try
 {
     await Builders.InitDatabase(app);
+
     // var timer = new PeriodicTimer(TimeSpan.FromHours(1));
     // while (await timer.WaitForNextTickAsync()) Builders.InitDatabase(app);
+    await Builders.InitDatabase(app);
 }
 catch (Exception e)
 {
