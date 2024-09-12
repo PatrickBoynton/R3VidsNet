@@ -9,6 +9,7 @@ public class VideoDbContext(DbContextOptions<VideoDbContext> options) : DbContex
     public DbSet<VideoStatus> VideoStatus { get; set; } = null!;
 
     public DbSet<VideoNavigation> VideoNavigations { get; set; } = null!;
+    public DbSet<Playlist> Playlists { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
