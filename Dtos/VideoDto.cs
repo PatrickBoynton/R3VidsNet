@@ -11,11 +11,12 @@ public class VideoDto
     public DateTime UploadedDate { get; set; }
     public decimal Duration { get; set; }
     public VideoStatusDto VideoStatus { get; set; }
-    public VideoNavigationDto VideoNavigation { get; set; }
 
 
     public static VideoDto MapToDto(Video video)
     {
+        ArgumentNullException.ThrowIfNull(video);
+
         return new VideoDto
         {
             Id = video.Id,
