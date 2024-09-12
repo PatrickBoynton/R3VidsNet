@@ -10,4 +10,4 @@ public class VideoStatus
     public DateTime? LastPlayed { get; set; }
     public Video Video { get; set; } = null!;
     public Guid VideoId { get; set; }
-}
+}       
