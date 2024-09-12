@@ -41,14 +41,21 @@ public class VideosController(VideoDbContext context) : ControllerBase
         return Ok(video);
     }
 
-    // http://localhost:5000/api/videos/search?title=video
-    // Not quite implemented yet
+    // http://192.168.1.x:5070/api/videos/search?title=videoTitle
+    // Not quite implemented yet.
+    // Currently only searching by title is set up.
     [HttpGet("search")]
-    public async Task<ActionResult<List<Video>>> GetVideos([FromQuery] SearchQuery query)
+    public async Task<ActionResult<List<VideoDto>>> GetVideos([FromQuery] SearchQuery query)
     {
-        var videos = await context.Videos.ToListAsync();
+        Console.WriteLine("----------------------------------------------------");
+        Console.WriteLine($"-----> Searching for video: {query.Title}");
+        Console.WriteLine("----------------------------------------------------");
+        var videos = await context.Videos.Include(v => v.VideoStatus).ToListAsync();
 
-        if (query.Title != null) videos = await context.Videos.Where(v => v.Title.Contains(query.Title)).ToListAsync();
+        var mappedVideos = videos.Select(VideoDto.MapToDto).ToList();
+
+        if (query.Title != null)
+            mappedVideos = mappedVideos.Where(v => v.Title.Contains(query.Title)).ToList();
 
         if (query.LastPlayed != null)
             videos = await context.Videos.Where(v => v.VideoStatus.LastPlayed == query.LastPlayed).ToListAsync();
@@ -62,7 +69,11 @@ public class VideosController(VideoDbContext context) : ControllerBase
         if (query.PlayCount != null)
             videos = await context.Videos.Where(v => v.VideoStatus.PlayCount == query.PlayCount).ToListAsync();
 
-        return Ok(videos);
+        Console.WriteLine("----------------------------------------------------");
+        Console.WriteLine($"-----> Found {mappedVideos.Count} videos");
+        Console.WriteLine("----------------------------------------------------");
+
+        return Ok(mappedVideos);
     }
 
     // http://localhost:5000/api/videos/played
