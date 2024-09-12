@@ -22,6 +22,31 @@ namespace R3vids.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("R3vids.Models.Playlist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Playlists");
+                });
+
             modelBuilder.Entity("R3vids.Models.Video", b =>
                 {
                     b.Property<Guid>("Id")
@@ -35,6 +60,9 @@ namespace R3vids.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("PlaylistId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -47,6 +75,8 @@ namespace R3vids.Data.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PlaylistId");
 
                     b.ToTable("Videos");
                 });
@@ -96,6 +126,13 @@ namespace R3vids.Data.Migrations
                     b.ToTable("VideoStatus");
                 });
 
+            modelBuilder.Entity("R3vids.Models.Video", b =>
+                {
+                    b.HasOne("R3vids.Models.Playlist", null)
+                        .WithMany("Videos")
+                        .HasForeignKey("PlaylistId");
+                });
+
             modelBuilder.Entity("R3vids.Models.VideoStatus", b =>
                 {
                     b.HasOne("R3vids.Models.Video", "Video")
@@ -105,6 +142,11 @@ namespace R3vids.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("R3vids.Models.Playlist", b =>
+                {
+                    b.Navigation("Videos");
                 });
 
             modelBuilder.Entity("R3vids.Models.Video", b =>
