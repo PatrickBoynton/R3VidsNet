@@ -22,7 +22,7 @@ public class VideoNavigationController(VideoDbContext context) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<VideoNavigation>> CreateVideoNavigation([FromBody] VideoNavigation navigation)
+    public async Task<ActionResult<VideoNavigation>> CreateVideoNavigation()
     {
         var existingNavigation = await context.VideoNavigations.FirstOrDefaultAsync();
 
@@ -31,14 +31,17 @@ public class VideoNavigationController(VideoDbContext context) : ControllerBase
             existingNavigation = new VideoNavigation
             {
                 Id = Guid.NewGuid(),
-                CurrentVideo = null,
-                PreviousVideo = null
+                CurrentVideo = Guid.Empty,
+                PreviousVideo = Guid.Empty
             };
             context.VideoNavigations.Add(existingNavigation);
             await context.SaveChangesAsync();
         }
 
-        return NoContent();
+        Console.WriteLine("-------------------- ");
+        Console.WriteLine($"------> Existing navigation: {existingNavigation.Id}");
+        Console.WriteLine("--------------------");
+        return CreatedAtAction(nameof(CreateVideoNavigation), new { id = existingNavigation.Id }, existingNavigation);
     }
 
     [HttpPut]
