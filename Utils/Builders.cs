@@ -38,6 +38,28 @@ public static class Builders
                     Console.WriteLine("----> Urls updated in database.");
                 }
             }
+
+            if (!context.VideoNavigations.Any())
+            {
+                var randomVideo = await context.Videos
+                    .Include(v => v.VideoStatus)
+                    .OrderBy(x => Guid.NewGuid()).AsQueryable()
+                    .FirstOrDefaultAsync();
+
+                var videoNavigation = new VideoNavigation
+                {
+                    Id = Guid.NewGuid(),
+                    CurrentVideo = randomVideo?.Id,
+                    PreviousVideo = null
+                };
+                context.VideoNavigations.Add(videoNavigation);
+                await context.SaveChangesAsync();
+                Console.WriteLine("----> Video navigation saved to database.");
+            }
+            else
+            {
+                Console.WriteLine("----> Video navigation already exists in database.");
+            }
         }
         catch (Exception e)
         {
