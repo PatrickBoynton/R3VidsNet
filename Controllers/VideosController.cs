@@ -93,10 +93,30 @@ public class VideosController(VideoDbContext context) : ControllerBase
     [HttpGet("random")]
     public async Task<ActionResult<VideoDto>> GetRandomVideo([FromQuery] RandomQuery? query)
     {
-        var video = await context.Videos
-            .Include(v => v.VideoStatus)
-            .OrderBy(x => Guid.NewGuid()).AsQueryable()
-            .FirstOrDefaultAsync();
+        var videoQuery = context.Videos
+            .AsQueryable();
+
+        //This is for less than or equal to ten minutes. All times are stored in seconds
+        //Example: http://localhost:5000/api/videos/random?Duration=600&Type=lte
+        // This is for greater than or equal to twenty minutes. 
+        //Example: http://localhost:5000/api/videos/random?Duration=1200&Type=gte
+        if (query is { Duration: not null, Type: not null })
+            videoQuery = query switch
+            {
+                { Duration: not null, Type: "lte" } => context.Videos.Where(v => v.Duration <= query.Duration),
+                { Duration: not null, Type: "gte" } => context.Videos.Where(v => v.Duration >= query.Duration),
+                _ => videoQuery
+            };
+
+        if (query is { IsPlayed: not null })
+            videoQuery = context.Videos.Include(v => v.VideoStatus)
+                .Where(v => v.VideoStatus.Played == query.IsPlayed.Value);
+
+
+        var video = await videoQuery.OrderBy(x => Guid.NewGuid()).Include(v => v.VideoStatus).FirstOrDefaultAsync();
+
+        if (video == null) return NotFound();
+
         Console.WriteLine("----------------------------------------------------");
         Console.WriteLine($"-----> Video: {video?.Title}");
         Console.WriteLine($"-----> Video Url: {video?.Url}");
@@ -109,33 +129,6 @@ public class VideosController(VideoDbContext context) : ControllerBase
         Console.WriteLine($"-----> Request: {Request.Path}");
         Console.WriteLine($"-----> Query: {Request.QueryString}");
         Console.WriteLine("----------------------------------------------------");
-
-        if (video == null) return NotFound();
-        //This is for less than or equal to ten minutes. All times are stored in seconds
-        //Example: http://localhost:5000/api/videos/random?Duration=600&Type=lte
-        // This is for greater than or equal to twenty minutes. 
-        //Example: http://localhost:5000/api/videos/random?Duration=1200&Type=gte
-        if (query is { Duration: not null, Type: not null })
-            video = query switch
-            {
-                { Duration: not null, Type: "lte" } => await context.Videos.Include(v => v.VideoStatus)
-                    .Where(v => v.Duration <= query.Duration)
-                    .OrderBy(v => Guid.NewGuid())
-                    .FirstOrDefaultAsync(),
-                { Duration: not null, Type: "gte" } => await context.Videos.Include(v => v.VideoStatus)
-                    .Where(v => v.Duration >= query.Duration)
-                    .OrderBy(v => Guid.NewGuid())
-                    .FirstOrDefaultAsync(),
-                _ => video
-            };
-
-        if (query is { IsPlayed: not null })
-            video = await context.Videos.Include(v => v.VideoStatus)
-                .Where(v => v.VideoStatus.Played == query.IsPlayed.Value)
-                .OrderBy(v => Guid.NewGuid())
-                .FirstOrDefaultAsync();
-
-        if (video == null) return NotFound();
 
         var videoDto = VideoDto.MapToDto(video);
 
