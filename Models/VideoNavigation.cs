@@ -6,6 +6,6 @@ namespace R3vids.Models;
 public class VideoNavigation
 {
     public Guid Id { get; set; }
-    public Guid? CurrentVideo { get; set; }
-    public Guid? PreviousVideo { get; set; }
+    public Guid? CurrentVideo { get; set; } = Guid.Empty;
+    public Guid? PreviousVideo { get; set; } = Guid.Empty;
 }
