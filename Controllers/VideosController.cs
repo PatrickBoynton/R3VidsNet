@@ -93,7 +93,7 @@ public class VideosController(VideoDbContext context) : ControllerBase
     [HttpGet("random")]
     public async Task<ActionResult<VideoDto>> GetRandomVideo([FromQuery] RandomQuery? query)
     {
-        var videoQuery = context.Videos
+        var videoQuery = context.Videos.Include(v => v.VideoStatus)
             .AsQueryable();
 
         //This is for less than or equal to ten minutes. All times are stored in seconds
@@ -101,34 +101,44 @@ public class VideosController(VideoDbContext context) : ControllerBase
         // This is for greater than or equal to twenty minutes. 
         //Example: http://localhost:5000/api/videos/random?Duration=1200&Type=gte
         if (query is { Duration: not null, Type: not null })
-            videoQuery = query switch
+            videoQuery = query.Type switch
             {
-                { Duration: not null, Type: "lte" } => context.Videos.Where(v => v.Duration <= query.Duration),
-                { Duration: not null, Type: "gte" } => context.Videos.Where(v => v.Duration >= query.Duration),
+                "lte" => videoQuery.Where(v => v.Duration <= query.Duration),
+                "gte" => videoQuery.Where(v => v.Duration >= query.Duration),
                 _ => videoQuery
             };
 
         if (query is { IsPlayed: not null })
-            videoQuery = context.Videos.Include(v => v.VideoStatus)
-                .Where(v => v.VideoStatus.Played == query.IsPlayed.Value);
+            videoQuery.Where(v => v.VideoStatus.Played == query.IsPlayed.Value);
 
 
-        var video = await videoQuery.OrderBy(x => Guid.NewGuid()).Include(v => v.VideoStatus).FirstOrDefaultAsync();
+        var video = await videoQuery
+            .OrderBy(x => Guid.NewGuid())
+            .Include(v => v.VideoStatus
+            ).FirstOrDefaultAsync();
 
         if (video == null) return NotFound();
 
         Console.WriteLine("----------------------------------------------------");
         Console.WriteLine($"-----> Video: {video?.Title}");
         Console.WriteLine($"-----> Video Url: {video?.Url}");
+        Console.WriteLine($"-----> Video Duration: {video?.Duration}");
         Console.WriteLine($"-----> Play count: {video?.VideoStatus.PlayCount}");
         Console.WriteLine($"-----> Played: {video?.VideoStatus.Played}");
         Console.WriteLine($"-----> Selected at: {DateTime.Now}");
         Console.WriteLine("----------------------------------------------------");
 
         Console.WriteLine("----------------------------------------------------");
+        Console.WriteLine($"-----> Query Duration: {query?.Duration}");
+        Console.WriteLine($"-----> Query Type: {query?.Type}");
+        Console.WriteLine($"-----> Query Played: {query?.IsPlayed}");
+        Console.WriteLine("----------------------------------------------------");
+
+        Console.WriteLine("----------------------------------------------------");
         Console.WriteLine($"-----> Request: {Request.Path}");
         Console.WriteLine($"-----> Query: {Request.QueryString}");
         Console.WriteLine("----------------------------------------------------");
+
 
         var videoDto = VideoDto.MapToDto(video);
 
