@@ -16,7 +16,7 @@ services:
             - ./wwwroot:/app/wwwroot
         working_dir: /app
         command: >
-            bash -c "dotnet restore &&
+            bash -c "
             apt-get update &&
             apt-get install -y ffmpeg &&
             dotnet tool install --global dotnet-ef &&
@@ -42,3 +42,4 @@ services:
 volumes:
     r3vids:
     dotnet:
+    nuget_cache:
