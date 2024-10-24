@@ -97,9 +97,9 @@ public class VideosController(VideoDbContext context) : ControllerBase
             .AsQueryable();
 
         //This is for less than or equal to ten minutes. All times are stored in seconds
-        //Example: http://localhost:5000/api/videos/random?Duration=600&Type=lte
+        //Example: http://localhost:5070/api/videos/random?Duration=600&Type=lte
         // This is for greater than or equal to twenty minutes. 
-        //Example: http://localhost:5000/api/videos/random?Duration=1200&Type=gte
+        //Example: http://localhost:5070/api/videos/random?Duration=1200&Type=gte
         if (query is { Duration: not null, Type: not null })
             videoQuery = query.Type switch
             {
@@ -108,14 +108,15 @@ public class VideosController(VideoDbContext context) : ControllerBase
                 _ => videoQuery
             };
 
+        // This is for random videos that aren't played.
+        // Example:  http://localhost:5070/api/videos/random?IsPlayed=false
         if (query is { IsPlayed: not null })
-            videoQuery.Where(v => v.VideoStatus.Played == query.IsPlayed.Value);
+            videoQuery = videoQuery.Where(v => v.VideoStatus.Played == query.IsPlayed);
 
 
         var video = await videoQuery
             .OrderBy(x => Guid.NewGuid())
-            .Include(v => v.VideoStatus
-            ).FirstOrDefaultAsync();
+            .FirstOrDefaultAsync();
 
         if (video == null) return NotFound();
 
@@ -214,11 +215,6 @@ public class VideosController(VideoDbContext context) : ControllerBase
         Console.WriteLine("----------------------------------------------------");
         Console.WriteLine($"-----> Updating video status: {video.Title}");
         Console.WriteLine("----------------------------------------------------");
-
-        // context.VideoNavigations.Add(new VideoNavigation
-        // {
-        //     CurrentVideo = video.Id
-        // });
 
         context.Videos.Update(video);
         await context.SaveChangesAsync();
