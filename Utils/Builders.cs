@@ -31,12 +31,22 @@ public static class Builders
             }
             else
             {
-                if (video?.Url != null && !FileHelpers.CheckIp(video.Url))
+                foreach (var vid in videos)
                 {
-                    UpdateUrl(videos);
-                    context.Videos.AddRange(videos);
-                    Console.WriteLine("----> Urls updated in database.");
+                    var existingVideo = context.Videos.FirstOrDefault(v => v.Title == vid.Title);
+                    if (existingVideo != null)
+                    {
+                        existingVideo.Url = vid.Url;
+                        context.Videos.Update(existingVideo);
+                    }
+                    else
+                    {
+                        context.Videos.Add(vid);
+                    }
                 }
+
+                await context.SaveChangesAsync();
+                Console.WriteLine("----> Video urls updated..");
             }
 
             if (!context.VideoNavigations.Any())
@@ -53,13 +63,15 @@ public static class Builders
                     PreviousVideo = null
                 };
                 context.VideoNavigations.Add(videoNavigation);
-                await context.SaveChangesAsync();
+                // await context.SaveChangesAsync();
                 Console.WriteLine("----> Video navigation saved to database.");
             }
             else
             {
                 Console.WriteLine("----> Video navigation already exists in database.");
             }
+
+            await context.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -103,7 +115,6 @@ public static class Builders
         {
             var files = FileHelpers.GetFiles();
             var baseUrl = BuildUrl();
-            // await CheckFilesAndUpdateDatabase(context, app, files);  
 
             var videos = files.Where(File.Exists)
                 .Where(file => file.EndsWith(".mp4"))
@@ -161,13 +172,8 @@ public static class Builders
                     }
                 }).ToList();
 
-
-            if (newVideos.Any())
-            {
-                context.Videos.AddRange(newVideos);
-                await context.SaveChangesAsync();
-            }
-
+            if (newVideos.Any()) context.Videos.AddRange(newVideos);
+            // await context.SaveChangesAsync();
             return videos;
         }
         catch (Exception e)
@@ -191,44 +197,5 @@ public static class Builders
             video.Url = BuildUrl() + Path.GetFileName(video.Url);
 
         return videos;
-    }
-
-
-    public static async Task CheckFilesAndUpdateDatabase(VideoDbContext context, WebApplication app, List<string> files)
-    {
-        using var scope = app.Services.CreateScope();
-
-        foreach (var file in files)
-        {
-            var url = BuildUrl();
-            var video = context.Videos.FirstOrDefault(v => v.Url == url);
-
-            if (video == null)
-            {
-                var videoStatus = new VideoStatus
-                {
-                    LastPlayed = null,
-                    CurrentPlayTime = 0,
-                    PlayCount = 0,
-                    Played = false,
-                    IsWatchLater = false,
-                    Video = null!,
-                    VideoId = Guid.NewGuid()
-                };
-
-                var newVideo = new Video
-                {
-                    Title = Path.GetFileNameWithoutExtension(file),
-                    Url = url,
-                    Image = "https://via.placeholder.com/150",
-                    Duration = BuildDuration(file),
-                    UploadedDate = DateTime.UtcNow,
-                    VideoStatus = videoStatus
-                };
-                context.Videos.Add(newVideo);
-            }
-        }
-
-        await context.SaveChangesAsync();
     }
 }
