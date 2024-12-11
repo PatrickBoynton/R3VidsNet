@@ -27,6 +27,8 @@ services:
             - "5070:5070"
         depends_on:
             - postgres
+        environment:
+            - TZ=America/New_York
     next:
         image: node:latest
         volumes:

@@ -56,6 +56,9 @@ catch (Exception e)
     throw;
 }
 
+var currentDateTime = DateTime.Now;
+Console.WriteLine("----> Started the program at: : " + currentDateTime.ToString("MM/dd/yyy hh:mm:ss tt"));
+
 app.Run();
 return;
 

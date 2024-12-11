@@ -126,7 +126,7 @@ public class VideosController(VideoDbContext context) : ControllerBase
         Console.WriteLine($"-----> Video Duration: {video?.Duration}");
         Console.WriteLine($"-----> Play count: {video?.VideoStatus.PlayCount}");
         Console.WriteLine($"-----> Played: {video?.VideoStatus.Played}");
-        Console.WriteLine($"-----> Selected at: {DateTime.Now}");
+        Console.WriteLine($"-----> Selected at: {DateTime.Now:MM/dd/yyy hh:mm:ss tt}");
         Console.WriteLine("----------------------------------------------------");
 
         Console.WriteLine("----------------------------------------------------");
@@ -184,7 +184,7 @@ public class VideosController(VideoDbContext context) : ControllerBase
         var videos = await context.Videos.Include(v => v.VideoStatus).ToListAsync();
         Console.WriteLine("----------------------------------------------------");
         Console.WriteLine("-----> Resetting all video status");
-        Console.WriteLine($"-----> Deleted at: {DateTime.Now}");
+        Console.WriteLine($"-----> Deleted at: {DateTime.Now:MM/dd/yyy hh:mm:ss tt}");
         Console.WriteLine("----------------------------------------------------");
         foreach (var video in videos)
         {

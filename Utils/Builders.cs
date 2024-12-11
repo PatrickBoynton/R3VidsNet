@@ -25,7 +25,7 @@ public static class Builders
 
                 context.VideoStatus.AddRange(videoStatuses);
 
-                await context.SaveChangesAsync();
+                // await context.SaveChangesAsync();
 
                 Console.WriteLine("----> Videos saved to database.");
             }
@@ -46,7 +46,7 @@ public static class Builders
                 }
 
                 await context.SaveChangesAsync();
-                Console.WriteLine("----> Video urls updated..");
+                Console.WriteLine("----> Video urls updated.");
             }
 
             if (!context.VideoNavigations.Any())
