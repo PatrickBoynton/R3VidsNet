@@ -17,6 +17,8 @@ public static class Builders
             var videos = await BuildVideo(context, app);
 
             Console.WriteLine("---> Initializing database.");
+            var currentDateTime = DateTime.Now;
+            Console.WriteLine("----> Init Database started at:: " + currentDateTime.ToString("MM/dd/yyy hh:mm:ss tt"));
             if (!context.Videos.Any() && !context.VideoStatus.Any())
             {
                 var videoStatuses = BuildVideoStatus(context);
