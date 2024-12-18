@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using R3vids.Data;
@@ -11,9 +12,11 @@ using R3vids.Data;
 namespace R3vids.Data.Migrations
 {
     [DbContext(typeof(VideoDbContext))]
-    partial class VideoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241218185918_AddSeries")]
+    partial class AddSeries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

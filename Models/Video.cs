@@ -9,4 +9,7 @@ public class Video
     public DateTime UploadedDate { get; set; } = DateTime.UtcNow;
     public decimal Duration { get; set; }
     public VideoStatus VideoStatus { get; set; } = null!;
+
+    public Guid? SeriesId { get; set; }
+    public Series? Series { get; set; } = null!;
 }
