@@ -15,10 +15,11 @@ public static class Builders
             var context = scope.ServiceProvider.GetRequiredService<VideoDbContext>();
             var video = context.Videos.FirstOrDefault();
             var videos = await BuildVideo(context, app);
-
+            Console.WriteLine("--------------------------");
             Console.WriteLine("---> Initializing database.");
             var currentDateTime = DateTime.Now;
             Console.WriteLine("----> Init Database started at:: " + currentDateTime.ToString("MM/dd/yyy hh:mm:ss tt"));
+            Console.WriteLine("--------------------------");
             if (!context.Videos.Any() && !context.VideoStatus.Any())
             {
                 var videoStatuses = BuildVideoStatus(context);
@@ -28,8 +29,9 @@ public static class Builders
                 context.VideoStatus.AddRange(videoStatuses);
 
                 // await context.SaveChangesAsync();
-
+                Console.WriteLine("----------------------------------");
                 Console.WriteLine("----> Videos saved to database.");
+                Console.WriteLine("----------------------------------");
             }
             else
             {
@@ -48,7 +50,9 @@ public static class Builders
                 }
 
                 await context.SaveChangesAsync();
+                Console.WriteLine("--------------------------");
                 Console.WriteLine("----> Video urls updated.");
+                Console.WriteLine("--------------------------");
             }
 
             if (!context.VideoNavigations.Any())
@@ -65,19 +69,24 @@ public static class Builders
                     PreviousVideo = null
                 };
                 context.VideoNavigations.Add(videoNavigation);
-                // await context.SaveChangesAsync();
+                Console.WriteLine("--------------------------------------------");
                 Console.WriteLine("----> Video navigation saved to database.");
+                Console.WriteLine("--------------------------------------------");
             }
             else
             {
+                Console.WriteLine("----------------------------------------------------");
                 Console.WriteLine("----> Video navigation already exists in database.");
+                Console.WriteLine("----------------------------------------------------");
             }
 
             await context.SaveChangesAsync();
         }
         catch (Exception e)
         {
+            Console.WriteLine("--------------------------");
             Console.WriteLine(e);
+            Console.WriteLine("--------------------------");
             throw;
         }
     }
@@ -91,14 +100,17 @@ public static class Builders
                 .AddJsonFile("appsettings.Development.json");
             var config = builder.Build();
             var ipAddress = config["IpAddress"];
-
+            Console.WriteLine("----------------------------------------------");
             Console.WriteLine($"----> Building url: http://{ipAddress}:5070/");
+            Console.WriteLine("----------------------------------------------");
 
             return $@"http://{ipAddress}:5070/";
         }
         catch (Exception e)
         {
+            Console.WriteLine("----------------------------------------------");
             Console.WriteLine(e);
+            Console.WriteLine("----------------------------------------------");
             throw;
         }
     }
@@ -180,7 +192,9 @@ public static class Builders
         }
         catch (Exception e)
         {
+            Console.WriteLine("----------------------------------------------");
             Console.WriteLine(e);
+            Console.WriteLine("----------------------------------------------");
             throw;
         }
     }
