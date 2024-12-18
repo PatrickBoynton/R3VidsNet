@@ -31,6 +31,7 @@ public class VideoDto
                 Played = video.VideoStatus.Played,
                 CurrentPlayTime = video.VideoStatus.CurrentPlayTime,
                 PlayCount = video.VideoStatus.PlayCount,
+                SelectionCount = video.VideoStatus.SelectionCount,
                 IsWatchLater = video.VideoStatus.IsWatchLater,
                 LastPlayed = video.VideoStatus.LastPlayed
             }

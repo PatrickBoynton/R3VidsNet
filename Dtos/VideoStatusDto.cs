@@ -6,6 +6,7 @@ public class VideoStatusDto
     public bool Played { get; set; }
     public decimal CurrentPlayTime { get; set; }
     public int PlayCount { get; set; }
+    public int SelectionCount { get; set; }
     public bool IsWatchLater { get; set; }
     public DateTime? LastPlayed { get; set; }
 }
