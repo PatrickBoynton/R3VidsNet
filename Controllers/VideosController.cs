@@ -156,8 +156,9 @@ public class VideosController(VideoDbContext context) : ControllerBase
         Console.WriteLine("Updating Video ");
         Console.WriteLine("----------------------------------------------------");
         Console.WriteLine($"-----> Updating video: {video.Title}");
+        Console.WriteLine($"-----> Time updated at: {DateTime.Now:MM/dd/yyy hh:mm:ss tt}");
         Console.WriteLine("----------------------------------------------------");
-
+        Console.WriteLine("-----> UPDATED FROM FULL UPDATE CONTROLLER");
         video.Title = videoDto.Title;
         video.Duration = videoDto.Duration;
         video.UploadedDate = videoDto.UploadedDate;
@@ -168,6 +169,7 @@ public class VideosController(VideoDbContext context) : ControllerBase
             Played = videoDto.VideoStatus.Played,
             CurrentPlayTime = videoDto.VideoStatus.CurrentPlayTime,
             PlayCount = videoDto.VideoStatus.PlayCount,
+            SelectionCount = videoDto.VideoStatus.SelectionCount,
             IsWatchLater = videoDto.VideoStatus.IsWatchLater,
             LastPlayed = videoDto.VideoStatus.LastPlayed
         };
