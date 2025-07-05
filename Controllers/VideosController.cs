@@ -195,6 +195,7 @@ public class VideosController(VideoDbContext context) : ControllerBase
             video.VideoStatus.PlayCount = 0;
             video.VideoStatus.IsWatchLater = false;
             video.VideoStatus.LastPlayed = null;
+            video.VideoStatus.SelectionCount = 0;
         }
 
         await context.SaveChangesAsync();

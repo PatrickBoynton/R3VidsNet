@@ -48,7 +48,7 @@ app.MapControllers();
 try
 {
     await Builders.InitDatabase(app);
-    var timer = ScheduledInit();
+    ScheduledInit();
 }
 catch (Exception e)
 {
@@ -64,6 +64,5 @@ return;
 
 Timer ScheduledInit()
 {
-    Console.WriteLine("----> Database initialization started.");
-    return new Timer(async _ => await Builders.InitDatabase(app), null, TimeSpan.Zero, TimeSpan.FromHours(1));
+    return new Timer(async _ => await Builders.InitDatabase(app), null, TimeSpan.FromHours(1), TimeSpan.FromHours(1));
 }

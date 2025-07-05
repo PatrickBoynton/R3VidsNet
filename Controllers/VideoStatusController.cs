@@ -66,10 +66,14 @@ public class VideoStatusController(VideoDbContext context) : ControllerBase
             videoStatus.PlayCount = 0;
             videoStatus.IsWatchLater = false;
             videoStatus.LastPlayed = null;
-        }
+            videoStatus.SelectionCount = 0;
+            Console.WriteLine($"Selection Count after reset: {videoStatus.SelectionCount}");
+        } 
 
         await context.SaveChangesAsync();
-
+        Console.WriteLine("---------------------------");
+        Console.WriteLine("Reset Video Status");
+        Console.WriteLine("---------------------------");
         return NoContent();
     }
 }
