@@ -14,3 +14,5 @@ In order to add a model you'll need to rebuild the project from the IDE as well.
 the context.
 I will add exact commands later if needed. 
 
+
+npm install &&

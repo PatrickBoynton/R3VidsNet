@@ -20,7 +20,11 @@ public static class Builders
             var currentDateTime = DateTime.Now;
             Console.WriteLine("----> Init Database started at:: " + currentDateTime.ToString("MM/dd/yyy hh:mm:ss tt"));
             Console.WriteLine("--------------------------");
-            if (!context.Videos.Any() && !context.VideoStatus.Any())
+            bool uniqueItems = context.Videos.Select(v => new { v.Title, v.Url })
+                                             .Distinct()
+                                             .Count() == context.Videos.Count();
+
+            if (!context.Videos.Any() && !context.VideoStatus.Any() && uniqueItems)
             {
                 var videoStatuses = BuildVideoStatus(context);
 
@@ -28,7 +32,6 @@ public static class Builders
 
                 context.VideoStatus.AddRange(videoStatuses);
 
-                // await context.SaveChangesAsync();
                 Console.WriteLine("----------------------------------");
                 Console.WriteLine("----> Videos saved to database.");
                 Console.WriteLine("----------------------------------");
@@ -207,11 +210,4 @@ public static class Builders
         return videoStatuses;
     }
 
-    private static List<Video> UpdateUrl(List<Video> videos)
-    {
-        foreach (var video in videos)
-            video.Url = BuildUrl() + Path.GetFileName(video.Url);
-
-        return videos;
-    }
 }

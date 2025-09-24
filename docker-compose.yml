@@ -14,15 +14,16 @@ services:
         volumes:
             - .:/app
             - ./wwwroot:/app/wwwroot
+            - /home/mymar101/.nuget/packages
         working_dir: /app
         command: >
-            bash -c "
-            apt-get update &&
-            apt-get install -y ffmpeg &&
-            dotnet tool install --global dotnet-ef &&
-            export PATH=\"$PATH:/root/.dotnet/tools\" &&
-            dotnet ef database update &&
-            dotnet watch run"
+            bash -c "apt-get update &&
+                     apt-get install -y ffmpeg &&
+                     if ! dotnet tool list -g | grep -q dotnet-ef; then dotnet tool install --global dotnet-ef; fi &&
+                     export PATH="$PATH:/root/.dotnet/tools" &&
+                     if [ ! -f /app/Data/Migrations ]; then  
+                     dotnet ef database update && touch /app/Data/Migrations; fi &&
+                     dotnet watch run"
         ports:
             - "5070:5070"
         depends_on:
@@ -33,6 +34,7 @@ services:
         image: node:latest
         volumes:
             - /home/mymar101/r3vids-next:/app
+            - /home/mymar101/r3vids-next/node_modules
         working_dir: /app
         command: >
             bash -c "npm install &&
