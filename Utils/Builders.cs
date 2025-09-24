@@ -20,11 +20,8 @@ public static class Builders
             var currentDateTime = DateTime.Now;
             Console.WriteLine("----> Init Database started at:: " + currentDateTime.ToString("MM/dd/yyy hh:mm:ss tt"));
             Console.WriteLine("--------------------------");
-            bool uniqueItems = context.Videos.Select(v => new { v.Title, v.Url })
-                                             .Distinct()
-                                             .Count() == context.Videos.Count();
 
-            if (!context.Videos.Any() && !context.VideoStatus.Any() && uniqueItems)
+            if (!context.Videos.Any() && !context.VideoStatus.Any())
             {
                 var videoStatuses = BuildVideoStatus(context);
 
@@ -41,13 +38,24 @@ public static class Builders
                 foreach (var vid in videos)
                 {
                     var existingVideo = context.Videos.FirstOrDefault(v => v.Title == vid.Title);
+
                     if (existingVideo != null)
                     {
-                        existingVideo.Url = vid.Url;
-                        context.Videos.Update(existingVideo);
+                        if (existingVideo.Url != vid.Url)
+                        {
+                            existingVideo.Url = vid.Url;
+                            context.Videos.Update(existingVideo);
+                            Console.WriteLine($"-------> Updated Video: {vid.Title}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("No update needed.");
+                            break;
+                        }
                     }
                     else
                     {
+                        Console.WriteLine($"-------> Added Video: {vid.Title}");
                         context.Videos.Add(vid);
                     }
                 }
